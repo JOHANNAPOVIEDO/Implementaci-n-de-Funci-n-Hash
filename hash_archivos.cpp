@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <fstream>
 using namespace std;
 
 const int TAM_TABLA = 20;
@@ -9,16 +10,14 @@ struct Nodo {
     Nodo* sig;
 };
 
-Nodo* tablaHash[TAM_TABLA]; // tabla principal
+Nodo* tablaHash[TAM_TABLA];
 int colisiones = 0;
 int elementosEnColisiones = 0;
 
-// Función hash
 int FuncionHash(int clave, int tamanoTabla) {
     return clave % tamanoTabla;
 }
 
-// Insertar elemento
 void InsertarElemento(int clave) {
     int pos = FuncionHash(clave, TAM_TABLA);
     Nodo* nuevo = new Nodo;
@@ -36,16 +35,16 @@ void InsertarElemento(int clave) {
     }
 }
 
-// Mostrar ocupación
 void MostrarOcupacion() {
+    cout << "\n Ocupación de tabla:\n";
     cout << "Tamaño del Área de Colisiones: " << TAM_TABLA << endl;
     cout << "Número de elementos en área de colisiones: " << elementosEnColisiones << endl;
     float porcentaje = (elementosEnColisiones * 100.0) / TAM_TABLA;
     cout << "Porcentaje de ocupación: " << porcentaje << "%" << endl;
 }
 
-// Mostrar tabla
 void MostrarTabla() {
+    cout << "\n Contenido de tabla Hash:\n";
     for (int i = 0; i < TAM_TABLA; ++i) {
         cout << "[" << i << "]: ";
         Nodo* temp = tablaHash[i];
@@ -57,18 +56,59 @@ void MostrarTabla() {
     }
 }
 
+// Guardar en archivo de texto
+void GuardarEnArchivoTXT(const char* nombreArchivo) {
+    ofstream archivo(nombreArchivo);
+    if (!archivo) {
+        cout << "Error al abrir archivo para guardar.\n";
+        return;
+    }
+
+    for (int i = 0; i < TAM_TABLA; ++i) {
+        Nodo* temp = tablaHash[i];
+        while (temp != NULL) {
+            archivo << temp->clave << endl;
+            temp = temp->sig;
+        }
+    }
+
+    archivo.close();
+    cout << " Datos guardados en archivo TXT.\n";
+}
+
+// Cargar desde archivo de texto
+void CargarDesdeArchivoTXT(const char* nombreArchivo) {
+    ifstream archivo(nombreArchivo);
+    if (!archivo) {
+        cout << "Archivo no encontrado. Se inicia tabla vacía.\n";
+        return;
+    }
+
+    int clave;
+    while (archivo >> clave) {
+        InsertarElemento(clave);
+    }
+
+    archivo.close();
+    cout << "Datos cargados desde archivo TXT.\n";
+}
+
 int main() {
     for (int i = 0; i < TAM_TABLA; ++i) tablaHash[i] = NULL;
 
     int valores[20] = { 3, 18, 41, 26, 7, 14, 33, 12, 9, 28, 19, 8, 21, 5, 17, 22, 1, 36, 39, 2 };
-
     int opcion;
+    const char* nombreArchivo = "datos_hash.txt";
+
     do {
-        cout << "\n1. Insertar un elemento manualmente";
-        cout << "\n2. Mostrar ocupación";
-        cout << "\n3. Mostrar tabla";
-        cout << "\n4. Insertar automáticamente 20 elementos";
-        cout << "\n5. Salir\nOpción: ";
+        cout << "\n MENÚ DE OPCIONES\n";
+        cout << "1. Insertar un elemento manualmente\n";
+        cout << "2. Mostrar ocupación\n";
+        cout << "3. Mostrar tabla\n";
+        cout << "4. Insertar automáticamente 20 elementos\n";
+        cout << "5. Guardar en archivo .txt\n";
+        cout << "6. Cargar desde archivo .txt\n";
+        cout << "7. Salir\nOpción: ";
         cin >> opcion;
 
         switch (opcion) {
@@ -91,8 +131,14 @@ int main() {
                 }
                 cout << "Se insertaron automáticamente 20 elementos.\n";
                 break;
+            case 5:
+                GuardarEnArchivoTXT(nombreArchivo);
+                break;
+            case 6:
+                CargarDesdeArchivoTXT(nombreArchivo);
+                break;
         }
-    } while (opcion != 5);
+    } while (opcion != 7);
 
     return 0;
 }
